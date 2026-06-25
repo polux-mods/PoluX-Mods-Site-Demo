@@ -1,137 +1,66 @@
-# Polux Mods — Firebase SPA
+# Polux Mods Site — Refactored Admin/DB Release
 
-Повністю статичний SPA-сайт без збірника. Його можна відкрити локально через простий сервер, залити на GitHub Pages або Firebase Hosting.
+Оновлена версія сайту з розширеною SPA-архітектурою під каталог модів Farming Simulator Mobile.
 
-## Що реалізовано
+## Що додано
 
-- SPA-роутинг без перезавантаження браузера: головна, моди, новини, сторінка моду/новини, профіль, налаштування, адмін-панель, звернення, сповіщення, про нас.
-- Ретро-піксельний UI з CRT scanlines/glitch і перемикачем ефекту.
-- Теми: Amber, Matrix, Cyberpunk 80s, Ice Terminal, Mono CRT.
-- Адаптивний дизайн для ПК і мобільних, включно з підняттям полів над мобільною клавіатурою.
-- Firebase Auth: реєстрація, вхід, email verification, скидання пароля, сувора валідація форм, око для пароля, підтвердження пароля.
-- Firestore: користувачі, профілі, ролі, моди, новини, коментарі, реакції, звернення/скарги, налаштування сайту, сповіщення, обране.
-- Storage: аватарки, банери, майбутні картинки контенту.
-- Адмін/модератор-панель із вкладками: публікація, користувачі, скарги/пропозиції, черга модів, налаштування сайту.
-- Каскадні коментарі, лайки/дизлайки, soft-delete коментарів.
-- Система подяк із лімітом 3 на місяць та 1 раз одному користувачу.
-- Модуль автоперекладу: клієнтська логіка + Cloud Function `translateDynamicText`.
+- Блочна адмін-панель з горизонтальною каруселлю:
+  - Публікація: редагування головної сторінки, публікація новин, публікація модів.
+  - Модерація користувачів: пошук за ID/email/іменем, найвища роль, останній онлайн, меню дій.
+  - Скарги та пропозиції: статуси `Нове`, `В роботі`, `Закрите`, відповіді адміністрації.
+  - Запропоновані моди: перегляд, схвалення, редагування, відхилення.
+  - Налаштування сайту: сезонне оформлення, maintenance mode, банер, керування ролями та правами.
+- Нормалізована структура даних у `localStorage` з ключем `polux.normalized.db.v2`:
+  - `users`, `mods`, `news`, `comments`, `ratings`, `favorites`, `tickets`, `reports`, `suggestions`, `notifications`, `roles`, `siteSettings`, `adminActions`.
+- Розширений `scripts/firebase-db-service.js` з універсальними методами `getDoc`, `setDoc`, `addDoc`, `listDocs`, `deleteDoc` і helper-методами під нормалізовані колекції.
+- Сторінки:
+  - Головна з динамічними блоками “Нові моди”, “Найбільш популярні”, “Новини”.
+  - Каталог модів з пошуком, фільтром, сортуванням, обраним і скаргами.
+  - Сторінка моду з галереєю, мініатюрами, fullscreen-зумом, рейтингом, кнопкою завантаження і коментарями.
+  - Новини з конструктором блоків і коментарями.
+  - Зворотній зв’язок з вкладками “Подати звернення” / “Мої звернення”.
+  - Обране, сповіщення, профіль, налаштування профілю.
+- Система сповіщень:
+  - Червона крапка біля аватарки, якщо є непрочитані події.
+  - Пункт “Сповіщення” у меню профілю.
+  - Тригери для зміни ролі, відповіді адміністрації, нових коментарів.
+- Коментарі:
+  - Каскадні відповіді.
+  - Rich text: посилання, `@username`, курсив через `*текст*`, inline images через `![alt](url)`.
+  - Реакції вгору/вниз.
+  - М’яке видалення тексту коментаря без зникнення гілки.
+- Обране:
+  - Пункт “Обране” у меню профілю.
+  - Перемикання з карток і сторінки моду.
+- Локалізація:
+  - Підтримуються `uk`, `ru`, `en`, `pl`, `de`, `es`, `fr`.
+  - Власні назви Polux Mods / FS Mobile / Firebase / GitHub не перекладаються.
+- Адаптивність:
+  - Додано CSS для мобільної адмінки, модальних вікон, коментарів, галереї, карток і форм.
+  - Враховано підняття полів над мобільною клавіатурою через `visualViewport`.
 
-## Важливо про автопереклад
+## Важливо
 
-Справжній автоматичний переклад не можна безпечно робити напряму з браузера, бо API-ключ перекладача буде видно всім. Тому в проєкт додано Firebase Cloud Function. Вона використовує Google Cloud Translate на сервері та повертає `i18n`-мапу для Firestore.
+Сайт залишається статичним і може працювати з GitHub Pages. Без Firebase усі дані зберігаються локально у браузері через `localStorage`. Для реального продакшену потрібно прописати Firestore Security Rules, щоб права ролей перевірялись не тільки на фронтенді, а й на стороні Firebase.
 
-Клієнт уже викликає callable-функцію `translateDynamicText`. Якщо Cloud Function не розгорнута, сайт зберігає український текст і працює без падіння.
+Адмін-доступ автоматично отримує email:
 
-## Запуск локально
+```text
+vitaliysh0705@gmail.com
+```
+
+## Файли
+
+- `index.html` — оновлена навігація і меню профілю.
+- `app.js` — основна SPA-логіка, маршрути, адмінка, моди, новини, коментарі, профілі, сповіщення.
+- `styles.css` — базовий стиль + нові адаптивні стилі для доданого функціоналу.
+- `scripts/firebase-db-service.js` — розширений Firestore-сервіс.
+
+## Тестування
+
+Перевірено синтаксис `app.js` через:
 
 ```bash
-cd polux-mods-site
-python -m http.server 8080
+node --check app.js
 ```
 
-Відкрий: `http://localhost:8080`
-
-Не відкривай `index.html` напряму через `file://`, бо ES modules і Firebase CDN повинні працювати через HTTP/HTTPS.
-
-## Firebase Hosting
-
-```bash
-npm i -g firebase-tools
-firebase login
-firebase use polux-mods
-firebase deploy --only hosting,firestore:rules,firestore:indexes,storage
-```
-
-## Cloud Functions для перекладу
-
-```bash
-cd firebase/functions
-npm install
-cd ../..
-firebase deploy --only functions
-```
-
-У Google Cloud для проєкту треба увімкнути Cloud Translation API та білінг, якщо він потрібний для API.
-
-## Колекції Firestore
-
-### `users/{uid}`
-```js
-{
-  uid, publicId, email, name,
-  roles: ['User'],
-  rating: 0,
-  modsCount: 0,
-  commentsCount: 0,
-  thanksReceived: 0,
-  bio: '', avatarUrl: '', coverUrl: '',
-  createdAt, lastOnline,
-  deletedAt: null,
-  nameChanges: []
-}
-```
-
-### `mods/{id}` і `news/{id}`
-```js
-{
-  type: 'mods' | 'news',
-  status: 'published' | 'draft' | 'deleted',
-  title, description, body,
-  i18n: { uk: { title, description, body }, en: {...} },
-  coverUrl, images: [],
-  authorUid, authorName,
-  category, modVersion, gameVersions: [], downloadUrl,
-  ratingAvg: 0, ratingCount: 0, downloads: 0,
-  createdAt, updatedAt
-}
-```
-
-### `comments/{id}`
-```js
-{
-  targetType: 'mods' | 'news',
-  targetId,
-  parentId: null,
-  text, imageUrl,
-  deleted: false,
-  score: 0,
-  authorUid, authorName, authorId, authorAvatar, authorRole,
-  createdAt, updatedAt
-}
-```
-
-### `appeals/{id}`
-```js
-{
-  kind: 'report' | 'feedback',
-  status: 'new' | 'working' | 'closed',
-  targetType, targetId, targetUid,
-  reason, topic, text, imageUrl,
-  authorUid, authorName,
-  createdAt, updatedAt
-}
-```
-
-### `site/settings`
-```js
-{
-  seasonal: false,
-  maintenance: false,
-  announcementEnabled: false,
-  announcementText: '',
-  announcementUrl: ''
-}
-```
-
-## Що потребує серверної частини для 100% production-рівня
-
-Firebase client SDK не може безпечно робити деякі адміністративні дії самостійно. Для повного production треба винести в Cloud Functions:
-
-- реальне завершення чужих сесій / revoke refresh tokens;
-- фізичне видалення акаунта після 30 днів;
-- гарантоване обмеження подяк транзакцією на сервері;
-- повний пошук користувачів за email/name/id для великих баз;
-- модераційні дії з аудит-логом;
-- генерацію thumbnails для Storage.
-
-У поточній кодовій базі ці місця підготовлені як чисті точки розширення, а не демо-сміття.

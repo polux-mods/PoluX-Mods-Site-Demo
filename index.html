@@ -1,31 +1,125 @@
 <!doctype html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0d12" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Polux Mods — офіційний адаптивний каталог модів, новин і спільноти Farming Simulator Mobile." />
   <title>Polux Mods — FS Mobile Mods</title>
-  <meta name="description" content="Polux Mods — ретро-піксельний каталог мобільних модів Farming Simulator." />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" href="src/assets/favicon.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;500;700&display=swap&subset=cyrillic,cyrillic-ext,latin-ext" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/base.css" />
-  <link rel="stylesheet" href="src/css/themes.css" />
-  <link rel="stylesheet" href="src/css/components.css" />
-  <link rel="stylesheet" href="src/css/responsive.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body data-theme="amber" class="crt-enabled">
-  <div id="crtLayer" aria-hidden="true"></div>
-  <div id="appShell">
-    <header id="siteHeader" class="site-header"></header>
-    <main id="app" class="app-view" tabindex="-1"></main>
-    <footer id="siteFooter" class="site-footer"></footer>
+<body data-theme="amber" class="crt-on">
+  <div class="boot" id="boot" aria-live="polite">
+    <div class="boot-card">
+      <div class="runner" aria-hidden="true">▟</div>
+      <p data-i18n="loading">Завантаження модуля...</p>
+    </div>
   </div>
-  <div id="modalRoot" class="modal-root" aria-live="polite"></div>
-  <div id="toastRoot" class="toast-root" aria-live="polite"></div>
-  <script type="module" src="src/js/main.js"></script>
+
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a href="#home" class="brand" aria-label="Polux Mods home">
+      <span class="logo" aria-hidden="true">PX</span>
+      <span>
+        <strong>Polux Mods</strong>
+        <small>FS Mobile / Pixel Garage</small>
+      </span>
+    </a>
+
+    <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
+
+    <nav class="nav" id="nav">
+      <a href="#home" data-link data-i18n="navHome">Головна</a>
+      <a href="#mods" data-link data-i18n="navMods">Моди</a>
+      <a href="#news" data-link data-i18n="navNews">Новини</a>
+      <a href="#about" data-link data-i18n="navAbout">Про нас</a>
+      <a href="#feedback" data-link data-i18n="navFeedback">Зворотній зв'язок</a>
+    </nav>
+
+    <div class="toolbar">
+      <button class="chip" id="crtToggle" type="button" data-i18n="crtOff">CRT: увімк.</button>
+      <select class="select" id="themeSelect" aria-label="Theme">
+        <option value="amber">Amber</option>
+        <option value="green">Terminal</option>
+        <option value="blue">Night Blue</option>
+        <option value="paper">Old Paper</option>
+        <option value="violet">Violet Disk</option>
+      </select>
+      <select class="select lang-select" id="langSelect" aria-label="Language">
+        <option value="uk">UA</option>
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+        <option value="pl">PL</option>
+        <option value="de">DE</option>
+        <option value="es">ES</option>
+        <option value="fr">FR</option>
+      </select>
+      <div class="profile-wrap" id="profileWrap">
+        <button class="profile-btn" id="profileBtn" type="button" aria-label="Profile" aria-haspopup="menu" aria-expanded="false">
+          <span class="profile-avatar" id="profileAvatar" aria-hidden="true">◉</span>
+          <span class="profile-name" id="profileName" data-i18n="loginShort">Вхід</span>
+        </button>
+        <div class="profile-menu" id="profileMenu" role="menu" aria-hidden="true"></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="shell" tabindex="-1"></main>
+
+  <div class="auth-modal" id="authModal" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <button class="auth-close" id="authClose" type="button" aria-label="Close">×</button>
+      <p class="eyebrow">/account</p>
+      <h2 id="authTitle" data-i18n="loginTitle">Вхід</h2>
+      <p class="auth-hint" data-i18n="authHint">Увійдіть у Polux Mods або створіть акаунт для профілю, обраних модів і майбутніх можливостей спільноти.</p>
+      <div class="auth-status" id="authStatus" aria-live="polite"></div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" type="button" data-mode="login" data-i18n="loginTab">Вхід</button>
+        <button class="auth-tab" id="registerTab" type="button" data-mode="register" data-i18n="registerTab">Реєстрація</button>
+      </div>
+      <form class="auth-form" id="authForm">
+        <label class="field" id="nameWrap"><span data-i18n="displayName">Ім'я профілю</span><input id="authName" autocomplete="name"><small class="field-error" id="nameError"></small></label>
+        <label class="field"><span>Email</span><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"><small class="field-error" id="emailError"></small></label>
+        <label class="field"><span data-i18n="password">Пароль</span><div class="password-box"><input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"><button class="password-eye" type="button" data-toggle-password="authPassword" data-i18n-title="showPassword" aria-label="Показати пароль">◉</button></div><small class="field-error" id="passwordError"></small></label>
+        <label class="field hidden" id="confirmWrap"><span data-i18n="confirmPassword">Підтвердження пароля</span><div class="password-box"><input id="authPasswordConfirm" type="password" autocomplete="new-password" placeholder="••••••••"><button class="password-eye" type="button" data-toggle-password="authPasswordConfirm" data-i18n-title="showPassword" aria-label="Показати пароль">◉</button></div><small class="field-error" id="confirmError"></small></label>
+        <button class="btn primary" type="submit" id="authSubmit" data-i18n="loginButton">Увійти</button>
+        <button class="auth-link" type="button" id="forgotPasswordBtn" data-i18n="forgotPassword">Забули пароль?</button>
+        <div class="auth-divider"><span data-i18n="orText">або</span></div>
+        <button class="btn google-btn" type="button" id="googleAuthBtn"><span aria-hidden="true">G</span><span data-i18n="googleLogin">Увійти через Google</span></button>
+        <div class="verify-actions hidden" id="verifyActions">
+          <button class="btn" type="button" id="resendVerificationBtn" data-i18n="resendVerification">Надіслати лист ще раз</button>
+          <button class="btn" type="button" id="checkVerificationBtn" data-i18n="checkVerification">Я вже підтвердив</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="auth-modal" id="resetModal" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+      <button class="auth-close" id="resetClose" type="button" aria-label="Close">×</button>
+      <p class="eyebrow">/account/reset</p>
+      <h2 id="resetTitle" data-i18n="resetTitle">Відновлення пароля</h2>
+      <p class="auth-hint" id="resetHint" data-i18n="resetEmailText">Введіть email, і ми надішлемо посилання для відновлення пароля.</p>
+      <div class="auth-status" id="resetStatus" aria-live="polite"></div>
+      <form class="auth-form" id="resetRequestForm">
+        <label class="field"><span>Email</span><input id="resetEmail" type="email" autocomplete="email" placeholder="you@example.com"><small class="field-error" id="resetEmailError"></small></label>
+        <button class="btn primary" type="submit" id="sendResetBtn" data-i18n="sendResetLink">Надіслати посилання</button>
+      </form>
+      <form class="auth-form hidden" id="newPasswordForm">
+        <label class="field"><span data-i18n="newPassword">Новий пароль</span><div class="password-box"><input id="newPassword" type="password" autocomplete="new-password" placeholder="••••••••"><button class="password-eye" type="button" data-toggle-password="newPassword" data-i18n-title="showPassword" aria-label="Показати пароль">◉</button></div><small class="field-error" id="newPasswordError"></small></label>
+        <label class="field"><span data-i18n="confirmNewPassword">Підтвердження нового пароля</span><div class="password-box"><input id="newPasswordConfirm" type="password" autocomplete="new-password" placeholder="••••••••"><button class="password-eye" type="button" data-toggle-password="newPasswordConfirm" data-i18n-title="showPassword" aria-label="Показати пароль">◉</button></div><small class="field-error" id="newPasswordConfirmError"></small></label>
+        <button class="btn primary" type="submit" id="confirmResetBtn" data-i18n="resetPasswordButton">Змінити пароль</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="scripts/firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="scripts/firebase-auth-service.js"></script>
+  <script src="scripts/firebase-db-service.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
