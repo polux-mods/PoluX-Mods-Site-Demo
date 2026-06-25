@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn(){ return request.auth != null; }
+    function userDoc(){ return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function hasRole(role){ return signedIn() && role in userDoc().data.roles; }
+    function moderator(){ return hasRole('Administrator') || hasRole('Moderator'); }
+    function owner(uid){ return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if owner(uid);
+      allow update: if owner(uid) || moderator();
+      allow delete: if false;
+      match /notifications/{id} { allow read, update: if owner(uid); allow create: if moderator(); allow delete: if false; }
+      match /favorites/{id} { allow read, write: if owner(uid); }
+      match /thanksQuota/{id} { allow read, write: if owner(uid); }
+      match /sentThanks/{id} { allow read, write: if owner(uid); }
+      match /sessions/{id} { allow read, write: if owner(uid) || moderator(); }
+    }
+    match /mods/{id} {
+      allow read: if resource.data.status == 'published' || moderator() || owner(resource.data.authorUid);
+      allow create: if signedIn();
+      allow update: if moderator() || owner(resource.data.authorUid);
+      allow delete: if false;
+      match /ratings/{uid} { allow read: if true; allow create: if owner(uid); allow update, delete: if false; }
+    }
+    match /news/{id} {
+      allow read: if resource.data.status == 'published' || moderator();
+      allow create, update: if moderator();
+      allow delete: if false;
+      match /ratings/{uid} { allow read: if true; allow create: if owner(uid); allow update, delete: if false; }
+    }
+    match /comments/{id} {
+      allow read: if true;
+      allow create: if signedIn();
+      allow update: if moderator() || owner(resource.data.authorUid);
+      allow delete: if false;
+      match /votes/{uid} { allow read: if true; allow create, update: if owner(uid); allow delete: if false; }
+    }
+    match /appeals/{id} {
+      allow create: if signedIn();
+      allow read: if moderator() || owner(resource.data.authorUid);
+      allow update: if moderator();
+      allow delete: if false;
+    }
+    match /site/{docId} { allow read: if true; allow write: if hasRole('Administrator'); }
+    match /translations/{id} { allow read: if true; allow create, update: if signedIn(); }
+    match /modSubmissions/{id} { allow read: if moderator() || owner(resource.data.authorUid); allow create: if signedIn(); allow update: if moderator() || owner(resource.data.authorUid); }
+  }
+}
